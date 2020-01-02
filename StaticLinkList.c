@@ -28,3 +28,78 @@ Status InitList(StaticLinkList space)
     space[MAXSIZE - 1].cur  = 0;    /*目前静态链表为空, 最后一个元素的 cur 为 0*/
     return  OK;
 }
+
+/*若备用空间链表非空, 则返回分配的结点下标, 否则返回 0*/
+int Malloc_SLL(StaticLinkList space)
+{
+    int i = space[0].cur;   /*当前数组第一个元素的 cur 存的值, 就是要返回的第一个备用空闲的下标*/
+    if (space[0].cur)
+    {
+        space[0].cur = space[i].cur;    /*由于要拿出一个分量来使用了, 所以我们就得把它的下一个分量用来做备用*/
+    }
+    return i;
+}
+
+/*在 L 中的第 i 个元素之前插入新的数据元素 e*/
+/*下标不变, 更改游标实现插入*/
+Status ListInsert(StaticLinkList L, int i, ElemType e)
+{
+    int j, k, l;
+    k = MAXSIZE - 1;    /*注意 k 首先是最后一个元素的下标*/
+    if (i < 1 || i > ListLength(L) + 1)
+    {
+        return ERROR;
+    }
+    j = Malloc_SLL(L);  /*获得空闲分量的下标*/
+    if (j)
+    {
+        L[j].data = e;  /*将数据赋值给此分量的 data*/
+        for ( l = 1; l < i - 1; l++)    /*找到第 i 个元素之前的位置*/
+        {
+            k = L[k].cur;
+        }
+        L[j].cur = L[k].cur;    /*把第 i 个元素之前的 cur 赋值给新元素的 cur*/
+        L[k].cur = j;   /*把新元素的下标赋值给第 i 个元素之前元素的 cur*/
+        return OK;
+    }
+    return ERROR;
+}
+
+/*删除在 L 中第 i 个数据元素 e*/
+Status  ListDelete(StaticLinkList L, int i)
+{
+    int j, k;
+    if (i < 1 || i > ListLength(L))
+    {
+        return ERROR;
+    }
+    k = MAXSIZE - 1;
+    for ( j = 1; j < i - 1; j++)
+    {
+        k = L[k].cur;
+    }
+    j = L[k].cur;
+    L[k].cur = L[j].cur;
+    Free_SLL(L, j);
+    return OK;
+}
+
+/*将下标为 k 的空闲结点回收到备用链表*/
+void Free_SLL(StaticLinkList space, int k)
+{
+    space[k].cur = space[0].cur;    /*把第一个元素 cur 的值赋给要删除的分量 cur*/
+    space[0].cur = k;   /*把要删除的分量下标赋值给第一个元素的 cur*/
+}
+
+/*初始条件 : 静态链表 L 已经存在. 操作结果 : 返回 L 中数据元素个数 */
+int ListLength(StaticLinkList L)
+{
+    int j = 0;
+    int i = L[MAXSIZE - 1].cur;
+    while (i)
+    {
+        i = L[i].cur;
+        j++;
+    }
+    return j;
+}
